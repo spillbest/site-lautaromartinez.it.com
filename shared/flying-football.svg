@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-label="Football flying into frame">
+  <defs>
+    <radialGradient id="ballSurface" cx="33%" cy="27%" r="76%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.34" stop-color="#eef4f6"/>
+      <stop offset="0.68" stop-color="#cbd5dc"/>
+      <stop offset="1" stop-color="#7d8994"/>
+    </radialGradient>
+    <radialGradient id="shine" cx="30%" cy="20%" r="42%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.42" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="motionBlue" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#0d1b2b" stop-opacity="0"/>
+      <stop offset="0.46" stop-color="#2f6bff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#c9ff3a" stop-opacity="0.16"/>
+    </linearGradient>
+    <filter id="trailBlur">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="softShadow" x="-45%" y="-45%" width="190%" height="190%">
+      <feDropShadow dx="-20" dy="24" stdDeviation="22" flood-color="#000000" flood-opacity="0.58"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#2f6bff" flood-opacity="0.24"/>
+    </filter>
+    <clipPath id="ballClip">
+      <circle cx="548" cy="178" r="118"/>
+    </clipPath>
+  </defs>
+
+  <g opacity="0.86" filter="url(#trailBlur)">
+    <path d="M38 130 C170 88 314 104 452 142" fill="none" stroke="url(#motionBlue)" stroke-width="20" stroke-linecap="round"/>
+    <path d="M18 186 C154 156 306 158 462 180" fill="none" stroke="url(#motionBlue)" stroke-width="13" stroke-linecap="round"/>
+    <path d="M78 248 C198 218 330 224 474 232" fill="none" stroke="url(#motionBlue)" stroke-width="9" stroke-linecap="round"/>
+    <path d="M160 296 C268 278 368 274 488 264" fill="none" stroke="url(#motionBlue)" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <g transform="rotate(-13 548 178)" filter="url(#softShadow)">
+    <circle cx="548" cy="178" r="118" fill="url(#ballSurface)"/>
+    <g clip-path="url(#ballClip)">
+      <path d="M548 109 L591 137 L579 189 L526 195 L506 147 Z" fill="#121821"/>
+      <path d="M444 153 L506 147 L526 195 L486 235 L429 210 Z" fill="#121821"/>
+      <path d="M591 137 L655 126 L681 180 L641 223 L579 189 Z" fill="#121821"/>
+      <path d="M486 235 L526 195 L579 189 L611 237 L575 285 L514 282 Z" fill="#121821"/>
+      <path d="M489 69 L548 109 L506 147 L447 133 Z" fill="#10161f"/>
+      <path d="M611 237 L641 223 L675 262 L631 312 L575 285 Z" fill="#10161f"/>
+      <path d="M429 210 L486 235 L514 282 L458 306 L409 264 Z" fill="#10161f"/>
+
+      <path d="M548 109 L506 147 L526 195 L579 189 L591 137 Z" fill="none" stroke="#d9e3e9" stroke-width="4" stroke-linejoin="round" opacity="0.9"/>
+      <path d="M444 153 L506 147 M429 210 L486 235 M486 235 L526 195 M579 189 L641 223 M591 137 L655 126 M611 237 L575 285 M514 282 L575 285 M548 109 L489 69" fill="none" stroke="#d9e3e9" stroke-width="3.2" stroke-linecap="round" opacity="0.78"/>
+      <path d="M455 112 C506 82 590 82 646 122" fill="none" stroke="#10161f" stroke-width="3" opacity="0.32"/>
+      <path d="M436 246 C500 300 590 315 656 260" fill="none" stroke="#10161f" stroke-width="3" opacity="0.28"/>
+      <path d="M432 172 C476 203 503 252 506 316" fill="none" stroke="#10161f" stroke-width="3" opacity="0.3"/>
+      <path d="M623 78 C602 134 596 208 624 296" fill="none" stroke="#10161f" stroke-width="3" opacity="0.3"/>
+      <circle cx="548" cy="178" r="118" fill="url(#shine)"/>
+      <circle cx="548" cy="178" r="118" fill="none" stroke="#f8fbff" stroke-opacity="0.45" stroke-width="5"/>
+      <circle cx="548" cy="178" r="118" fill="none" stroke="#05070c" stroke-opacity="0.2" stroke-width="7"/>
+    </g>
+  </g>
+</svg>
