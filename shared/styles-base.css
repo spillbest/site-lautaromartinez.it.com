@@ -1,0 +1,272 @@
+/* Winita render base — correctness-bearing CSS emitted with every site.
+   The LLM "skin" phase layers brand visuals on top of this; it must NOT remove
+   these rules. They encode the accessibility / responsive / layout invariants the
+   auditors check (container width, footer grid, mobile nav, focus-visible,
+   reduced-motion, tap targets, table scroll, fluid grids, 16px body, hero clamp).
+   The few non-negotiable a11y rules use !important so a theme can't drop them. */
+
+:root {
+  --tap-min: 44px;
+  --maxw: 1100px;
+  --focus-ring: #0a5ac9;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Accessible focus: visible ring for keyboard users only. !important so a brand
+   theme can never silently remove the keyboard-focus indicator. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respect reduced-motion globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* No cross-document View Transitions: the root cross-fade re-ran on every
+   internal navigation and read as the whole page "blinking" on each menu click. */
+
+/* Skip-link: hidden until focused. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 10px 16px;
+  background: var(--focus-ring);
+  color: #fff;
+  z-index: 1000;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Shared content container ──────────────────────────────────────────────
+   Header inner, main, and footer inner all align to the same max width so the
+   chrome never spills wider than the content column. */
+main.page,
+.mh-top,
+.mh-cats-inner,
+.mf-inner {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  width: 100%;
+}
+main.page {
+  padding: 24px 16px;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+header.mh {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.mh-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding-inline: 16px;
+}
+.mh-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.mh-spacer {
+  flex: 1 1 auto;
+}
+.mh-logo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  text-decoration: none;
+}
+.mh-cats-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-inline: 16px;
+  min-width: 0;
+}
+.mh-cats-inner a {
+  /* display + centering are locked: a theme that flips these to inline-block
+     leaves the link text top-aligned inside the 44px tap target. Colors,
+     padding and radius remain free for the skin to restyle. */
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: var(--tap-min);
+  padding: 0 4px;
+  text-decoration: none;
+}
+.mh-menu-toggle {
+  display: none; /* desktop: nav is always visible; shown on mobile (below) */
+  width: var(--tap-min);
+  height: var(--tap-min);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+}
+
+/* Tap targets ≥ 44×44 (WCAG 2.5.5) for standalone controls. */
+.btn,
+summary {
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Breadcrumbs & related links ─────────────────────────────────────────── */
+ol.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+nav[aria-label] ul.related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+}
+ul.related a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+
+/* Tables scroll horizontally inside a wrapper instead of stretching the page. */
+.tbl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tbl-wrap table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Fluid card grid: minmax(0,1fr) prevents min-content blowout / overflow. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(0, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.mf-inner {
+  padding: 32px 16px;
+}
+.mf-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  min-width: 0;
+}
+.mf-cols a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  text-decoration: none;
+}
+.mf-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* ── Mobile (≤ 860px): collapse nav behind the burger ─────────────────────── */
+@media (max-width: 860px) {
+  .mh-menu-toggle {
+    display: inline-flex;
+  }
+  nav.mh-cats {
+    display: none;
+  }
+  nav.mh-cats.is-open {
+    display: block;
+  }
+  .mh-cats-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .mh-cats-inner a {
+    min-height: 48px;
+    padding: 8px 4px;
+  }
+}
+
+/* Long words (Italian/German) must wrap, not overflow, on small screens. */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+}

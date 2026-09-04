@@ -1,0 +1,2190 @@
+/* Winita render base — correctness-bearing CSS emitted with every site.
+   The LLM "skin" phase layers brand visuals on top of this; it must NOT remove
+   these rules. They encode the accessibility / responsive / layout invariants the
+   auditors check (container width, footer grid, mobile nav, focus-visible,
+   reduced-motion, tap targets, table scroll, fluid grids, 16px body, hero clamp).
+   The few non-negotiable a11y rules use !important so a theme can't drop them. */
+
+:root {
+  --tap-min: 44px;
+  --maxw: 1100px;
+  --focus-ring: #0a5ac9;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.visual-asset {
+  display: block;
+  width: min(100%, 920px);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 18px;
+  margin: 18px 0 28px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.visual-asset.portrait {
+  aspect-ratio: 4 / 5;
+  max-width: 520px;
+}
+
+.visual-asset.silhouette-asset {
+  aspect-ratio: auto;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  filter:
+    drop-shadow(0 0 18px rgba(47, 107, 255, 0.34))
+    drop-shadow(0 0 42px rgba(47, 107, 255, 0.2))
+    drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
+}
+
+/* Accessible focus: visible ring for keyboard users only. !important so a brand
+   theme can never silently remove the keyboard-focus indicator. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respect reduced-motion globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* No cross-document View Transitions: the root cross-fade re-ran on every
+   internal navigation and read as the whole page "blinking" on each menu click. */
+
+/* Skip-link: hidden until focused. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 10px 16px;
+  background: var(--focus-ring);
+  color: #fff;
+  z-index: 1000;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Shared content container ──────────────────────────────────────────────
+   Header inner, main, and footer inner all align to the same max width so the
+   chrome never spills wider than the content column. */
+main.page,
+.mh-top,
+.mh-cats-inner,
+.mf-inner {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  width: 100%;
+}
+main.page {
+  padding: 24px 16px;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+header.mh {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.mh-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding-inline: 16px;
+}
+.mh-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.mh-spacer {
+  flex: 1 1 auto;
+}
+.mh-logo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  text-decoration: none;
+}
+.mh-cats-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-inline: 16px;
+  min-width: 0;
+}
+.mh-cats-inner a {
+  /* display + centering are locked: a theme that flips these to inline-block
+     leaves the link text top-aligned inside the 44px tap target. Colors,
+     padding and radius remain free for the skin to restyle. */
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: var(--tap-min);
+  padding: 0 4px;
+  text-decoration: none;
+}
+.mh-menu-toggle {
+  display: none; /* desktop: nav is always visible; shown on mobile (below) */
+  width: var(--tap-min);
+  height: var(--tap-min);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+}
+
+/* Tap targets ≥ 44×44 (WCAG 2.5.5) for standalone controls. */
+.btn,
+summary {
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Breadcrumbs & related links ─────────────────────────────────────────── */
+ol.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+nav[aria-label] ul.related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+}
+ul.related a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+
+/* Tables scroll horizontally inside a wrapper instead of stretching the page. */
+.tbl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tbl-wrap table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Fluid card grid: minmax(0,1fr) prevents min-content blowout / overflow. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(0, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.mf-inner {
+  padding: 32px 16px;
+}
+.mf-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  min-width: 0;
+}
+.mf-cols a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  text-decoration: none;
+}
+.mf-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* ── Mobile (≤ 860px): collapse nav behind the burger ─────────────────────── */
+@media (max-width: 860px) {
+  .mh-menu-toggle {
+    display: inline-flex;
+  }
+  nav.mh-cats {
+    display: none;
+  }
+  nav.mh-cats.is-open {
+    display: block;
+  }
+  .mh-cats-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .mh-cats-inner a {
+    min-height: 48px;
+    padding: 8px 4px;
+  }
+}
+
+/* Long words (Italian/German) must wrap, not overflow, on small screens. */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+}
+
+
+/* --- brand theme --- */
+:root {
+  --brand-bg: #071013;
+  --brand-surface: #111B1F;
+  --brand-text: #F4F2EA;
+  --brand-muted: #A8B0A8;
+  --brand-primary: #D6A642;
+  --brand-primary-fg: #10100C;
+  --brand-accent: #17A66A;
+  --brand-border: #2B3838;
+
+  --font-display: "Archivo Black", "Arial Narrow", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: 4rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--brand-accent) 18%, transparent), transparent 34rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--brand-surface) 72%, var(--brand-bg)), var(--brand-bg) 38rem);
+  color: var(--brand-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--space-4);
+  color: var(--brand-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+h1 {
+  font-size: clamp(var(--text-3xl), 7vw, var(--text-4xl));
+}
+
+h2 {
+  font-size: clamp(var(--text-2xl), 4vw, var(--text-3xl));
+}
+
+h3 {
+  font-size: var(--text-xl);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  color: var(--brand-muted);
+  line-height: var(--leading-relaxed);
+}
+
+a {
+  color: var(--brand-primary);
+  font-weight: var(--weight-medium);
+  text-decoration-color: color-mix(in srgb, var(--brand-primary) 42%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--brand-text);
+  text-decoration-color: var(--brand-accent);
+}
+
+.mh {
+  background: color-mix(in srgb, var(--brand-bg) 88%, var(--brand-surface));
+  border-bottom: 1px solid var(--brand-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.mh-top {
+  min-height: 4.5rem;
+  padding: 0 var(--space-8);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.mh-logo {
+  color: var(--brand-text);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  text-decoration: none;
+}
+
+.mh-logo::first-letter {
+  color: var(--brand-primary);
+}
+
+.mh-cats {
+  border-top: 1px solid color-mix(in srgb, var(--brand-border) 78%, transparent);
+  background: color-mix(in srgb, var(--brand-surface) 62%, var(--brand-bg));
+}
+
+.mh-cats a {
+  color: var(--brand-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.mh-cats a:hover {
+  color: var(--brand-primary);
+}
+
+.btn,
+.btn-cta,
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.875rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.btn:hover,
+.btn-cta:hover,
+.btn-primary:hover,
+.btn-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.btn,
+.btn-primary,
+.btn-cta {
+  background: var(--brand-primary);
+  color: var(--brand-primary-fg);
+  border-color: var(--brand-primary);
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-cta:hover {
+  background: var(--brand-text);
+  color: var(--brand-primary-fg);
+  border-color: var(--brand-text);
+}
+
+.btn-secondary {
+  background: color-mix(in srgb, var(--brand-surface) 78%, transparent);
+  color: var(--brand-text);
+  border-color: var(--brand-border);
+}
+
+.btn-secondary:hover {
+  background: var(--brand-accent);
+  color: var(--brand-primary-fg);
+  border-color: var(--brand-accent);
+}
+
+.card-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.card {
+  padding: var(--space-6);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--brand-surface) 94%, var(--brand-primary)), var(--brand-surface));
+  color: var(--brand-text);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.card h2,
+.card h3 {
+  color: var(--brand-text);
+}
+
+.card p {
+  color: var(--brand-muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 55%, var(--brand-border));
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--brand-primary) 16%, var(--brand-surface));
+  color: var(--brand-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  text-transform: uppercase;
+}
+
+.tbl-wrap {
+  overflow: auto;
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-md);
+  background: var(--brand-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--brand-text);
+  font-size: var(--text-sm);
+}
+
+th,
+td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--brand-border);
+  text-align: left;
+}
+
+th {
+  background: color-mix(in srgb, var(--brand-bg) 64%, var(--brand-surface));
+  color: var(--brand-primary);
+  font-weight: var(--weight-bold);
+}
+
+td {
+  color: var(--brand-muted);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.crumbs {
+  color: var(--brand-muted);
+  font-size: var(--text-sm);
+}
+
+.crumbs a {
+  color: var(--brand-muted);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--brand-primary);
+}
+
+.related {
+  padding: var(--space-6);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--brand-surface) 84%, var(--brand-bg));
+  box-shadow: var(--shadow-sm);
+}
+
+.related a {
+  color: var(--brand-text);
+  text-decoration-color: color-mix(in srgb, var(--brand-accent) 50%, transparent);
+}
+
+.related a:hover {
+  color: var(--brand-primary);
+}
+
+.mf {
+  margin-top: var(--space-16);
+  padding: var(--space-12) var(--space-8);
+  background: color-mix(in srgb, var(--brand-bg) 86%, var(--brand-surface));
+  color: var(--brand-muted);
+  border-top: 1px solid var(--brand-border);
+}
+
+.mf-cols {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.mf a {
+  color: var(--brand-muted);
+  text-decoration: none;
+}
+
+.mf a:hover {
+  color: var(--brand-primary);
+}
+
+.mf-trust {
+  padding: var(--space-4);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--brand-surface) 68%, var(--brand-bg));
+  color: var(--brand-muted);
+  font-size: var(--text-sm);
+}
+
+.age-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-12);
+  min-height: var(--space-12);
+  border: 1px solid var(--brand-primary);
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: var(--brand-primary-fg);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+}
+
+@media (max-width: 720px) {
+  .mh-top {
+    padding: 0 var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .card,
+  .related,
+  .mf-trust {
+    padding: var(--space-4);
+  }
+
+  .mf {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  th,
+  td {
+    padding: var(--space-3);
+  }
+}
+
+/* --- Lautaro standalone-reference skin --- */
+:root {
+  --brand-bg: #0a0b0e;
+  --brand-surface: #101218;
+  --brand-text: #f4f5f7;
+  --brand-muted: #aeb5c1;
+  --brand-primary: #c9ff3a;
+  --brand-primary-fg: #08090b;
+  --brand-accent: #2f6bff;
+  --brand-border: rgba(255, 255, 255, 0.09);
+  --brand-gold: #d8b15f;
+  --font-display: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
+  --font-body: "Arial", "Helvetica Neue", sans-serif;
+  --font-mono: "Courier New", monospace;
+  --maxw: 1280px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+}
+
+html {
+  scroll-padding-top: 168px;
+}
+
+body {
+  background:
+    radial-gradient(90% 70% at 80% 6%, rgba(47, 107, 255, 0.22), transparent 58%),
+    radial-gradient(80% 70% at 12% 34%, rgba(201, 255, 58, 0.08), transparent 58%),
+    #0a0b0e;
+  color: var(--brand-text);
+  font-family: var(--font-body);
+  letter-spacing: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+.mh {
+  background: rgba(10, 11, 14, 0.86);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+  backdrop-filter: blur(14px);
+}
+
+.mh-top {
+  min-height: 88px;
+  padding: 0 40px;
+  gap: 28px;
+}
+
+.mh-logo {
+  gap: 8px;
+  color: var(--brand-text);
+  font-family: var(--font-display);
+  font-size: 42px;
+  min-height: 72px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.mh-logo-text {
+  font-size: 0;
+}
+
+.mh-logo-text::before {
+  content: "LAUTARO";
+  font-size: clamp(34px, 3.25vw, 48px);
+}
+
+.mh-logo::after {
+  content: ".10";
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  transform: translateY(5px);
+}
+
+.mh-cats {
+  background: rgba(12, 13, 17, 0.82);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mh-cats-inner {
+  gap: 12px 34px;
+  padding: 0 40px;
+  min-height: 58px;
+  align-items: center;
+}
+
+.mh-cats a {
+  color: #949ba7;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  min-height: 52px;
+  text-transform: uppercase;
+}
+
+.mh-cats a:hover,
+.mh-cats a.is-active {
+  color: var(--brand-primary);
+}
+
+.btn,
+.btn-primary,
+.btn-cta {
+  min-width: 178px;
+  min-height: 56px;
+  padding: 15px 26px;
+  border: 1px solid rgba(201, 255, 58, 0.58);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d7ff41 0%, #aef21d 100%);
+  color: #050607;
+  box-shadow:
+    0 18px 42px -18px rgba(201, 255, 58, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-cta:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #dce3ef 100%);
+  color: #050607;
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 20px 46px -18px rgba(255, 255, 255, 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.btn-cta {
+  min-width: 220px;
+  min-height: 62px;
+}
+
+.related .btn,
+.related a {
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 18px;
+  font-size: 16px;
+  text-transform: none;
+  box-shadow: none;
+}
+
+.odds-ticker {
+  position: sticky;
+  top: 147px;
+  z-index: 45;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0c0d11;
+}
+
+.odds-track {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  width: 100%;
+  gap: 34px;
+  padding: 11px 0;
+  color: #8b8f99;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  animation: none;
+}
+
+.odds-track span {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.odds-track b {
+  color: var(--brand-primary);
+  white-space: nowrap;
+}
+
+.odds-track span:nth-child(n + 6) {
+  display: none;
+}
+
+main.page {
+  max-width: var(--maxw);
+  padding: 0 40px 96px;
+}
+
+body[data-page="index"] main.page {
+  display: grid;
+  grid-template-columns: minmax(0, 620px) minmax(280px, 1fr);
+  gap: 34px;
+  align-items: end;
+  max-width: none;
+  width: calc(100% - 48px);
+  margin: 20px 24px 0;
+  padding: 72px 44px 58px;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  box-sizing: border-box;
+}
+
+body[data-page="index"] main.page::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: min(780px, calc(100vh - 16px));
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.98) 0%, rgba(5, 7, 12, 0.9) 28%, rgba(5, 7, 12, 0.42) 54%, rgba(8, 22, 58, 0.68) 100%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0.06) 0%, rgba(5, 7, 12, 0.42) 100%),
+    url("/shared/lautaro-hero-action.png") center right / cover no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+body[data-page="index"] main.page::before {
+  content: "Mondiale 2026 . Girone J";
+  grid-column: 1;
+  align-self: end;
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding-left: 30px;
+  border-left: 46px solid var(--brand-primary);
+  line-height: 1;
+}
+
+body[data-page="index"] main.page > h1 {
+  grid-column: 1;
+  max-width: 660px;
+  margin: 22px 0 0;
+  font-size: clamp(54px, 6.6vw, 116px);
+  line-height: 0.9;
+  text-shadow: 0 12px 40px rgba(0, 0, 0, 0.48);
+}
+
+body[data-page="index"] main.page > h1 span {
+  display: block;
+}
+
+body[data-page="index"] main.page > h1 .h1-accent {
+  color: #2f6bff;
+}
+
+body[data-page="index"] main.page > .visual-asset:first-of-type {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  width: 100%;
+  height: min(58vw, 620px);
+  min-height: 500px;
+  margin: 0;
+  object-position: center bottom;
+  align-self: start;
+}
+
+body[data-page="index"] main.page > .visual-asset.silhouette-asset:first-of-type {
+  width: min(92%, 500px);
+  max-height: 560px;
+  justify-self: center;
+  align-self: center;
+  opacity: 0.78;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 22px rgba(47, 107, 255, 0.12))
+    drop-shadow(0 28px 44px rgba(0, 0, 0, 0.34));
+  mask-image: linear-gradient(to bottom, black 0%, black 84%, transparent 100%);
+}
+
+body[data-page="index"] main.page > section:first-of-type {
+  grid-column: 1;
+  margin: 0;
+  padding: 28px 0 0;
+  border-top: 0;
+}
+
+body[data-page="index"] main.page > section:first-of-type h2 {
+  display: none;
+}
+
+body[data-page="index"] main.page > section:first-of-type p {
+  max-width: 540px;
+  color: #c8cdd6;
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+body[data-page="index"] main.page > section:first-of-type ul {
+  display: none;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.btn-secondary {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(10, 12, 17, 0.48);
+  color: #f2f4f8;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+body[data-page="index"] main.page > section:not(:first-of-type),
+body[data-page="index"] main.page > nav[aria-label="Pagine correlate"] {
+  grid-column: 1 / -1;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 92px);
+  font-weight: 400;
+  line-height: 0.94;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+p {
+  color: #b9bec8;
+}
+
+ol.crumbs {
+  padding-top: 32px;
+  color: #777d88;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+section {
+  margin: 0;
+  padding: 82px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+section:first-of-type {
+  border-top: 0;
+}
+
+section > p,
+section > ul,
+section > .tbl-wrap,
+details {
+  max-width: 820px;
+}
+
+main.page section ul:not(.related) {
+  display: grid;
+  gap: 12px;
+  padding-left: 0;
+  list-style: none;
+}
+
+main.page section ul:not(.related) > li {
+  position: relative;
+  padding-left: 22px;
+  color: #dfe2e8;
+}
+
+main.page section ul:not(.related) > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+}
+
+.visual-asset {
+  width: min(100%, 980px);
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 30px 90px -28px rgba(47, 107, 255, 0.7);
+  object-fit: cover;
+  background: #14161b;
+}
+
+.visual-asset.portrait {
+  aspect-ratio: 3 / 4;
+  max-width: 560px;
+  object-position: center top;
+}
+
+.tbl-wrap {
+  margin-top: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: #0c0d11;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+caption {
+  padding: 16px 18px;
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+th,
+td {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 18px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+th {
+  color: #8b8f99;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+td {
+  color: #dfe2e8;
+}
+
+th:first-child,
+td:first-child {
+  width: 38%;
+}
+
+th:last-child,
+td:last-child {
+  width: 62%;
+}
+
+details {
+  margin: 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: linear-gradient(160deg, #151821, #101218);
+  padding: 0 18px;
+}
+
+summary {
+  color: var(--brand-text);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+details p {
+  padding-bottom: 16px;
+}
+
+.related {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: min(100%, 860px);
+  margin: 30px auto 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px !important;
+  background: rgba(14, 16, 24, 0.72);
+}
+
+.related li {
+  display: flex;
+  padding-left: 0;
+  color: inherit;
+}
+
+.related li::before {
+  content: none;
+}
+
+.related a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: var(--brand-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mf {
+  margin: 0;
+  padding: 46px 40px 96px;
+  background: #0c0d11;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.mf-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+}
+
+.mf-copy {
+  max-width: 720px;
+}
+
+.age-tag {
+  min-width: 46px;
+  min-height: 46px;
+  background: transparent;
+  color: var(--brand-primary);
+  border-color: rgba(201, 255, 58, 0.45);
+}
+
+.mission-popup {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: 18px;
+  z-index: 70;
+  display: block;
+  align-items: center;
+  width: min(calc(100% - 48px), 1200px);
+  transform: translateX(-50%);
+  min-height: 148px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgba(3, 5, 9, 0.98) 0%, rgba(3, 5, 9, 0.88) 38%, rgba(7, 18, 39, 0.5) 70%, rgba(3, 5, 9, 0.86) 100%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0.22), rgba(5, 7, 12, 0.62)),
+    url("/shared/lautaro-hero-action.png") right 38% center / cover no-repeat;
+  box-shadow: 0 28px 90px -34px rgba(0, 0, 0, 0.94);
+  opacity: 0;
+  pointer-events: none;
+  translate: 0 22px;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+
+.mission-popup::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 82% 28%, rgba(47, 107, 255, 0.34), transparent 28%),
+    radial-gradient(ellipse at 82% 100%, rgba(201, 255, 58, 0.12), transparent 34%);
+  pointer-events: none;
+}
+
+.mission-popup::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #05070c 0%, rgba(5, 7, 12, 0.78) 32%, rgba(5, 7, 12, 0.18) 66%, rgba(5, 7, 12, 0.64) 100%);
+  pointer-events: none;
+}
+
+.mission-popup.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  translate: 0 0;
+}
+
+.mission-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: rgba(5, 7, 12, 0.62);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 12px 34px -20px rgba(0, 0, 0, 0.9);
+}
+
+.mission-popup-close:hover {
+  border-color: rgba(201, 255, 58, 0.54);
+  color: var(--brand-primary);
+}
+
+.mission-popup-content {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  max-width: 560px;
+  padding: 26px 24px;
+}
+
+.mission-popup-content strong {
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
+.mission-popup-content span {
+  color: #ffffff;
+  font-size: 31px;
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.mission-popup-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 234px;
+  min-height: 52px;
+  margin-top: 10px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #d6ff2f 0%, #b8ff14 100%);
+  color: #050607;
+  font-size: 20px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow:
+    0 16px 40px -18px rgba(201, 255, 58, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.mission-popup-cta:hover {
+  background: linear-gradient(180deg, #efff86 0%, #c9ff3a 100%);
+  color: #050607;
+}
+
+body:not([data-page="index"]) main.page {
+  padding-top: 38px;
+}
+
+body:not([data-page="index"]) main.page > h1 {
+  max-width: 980px;
+}
+
+body:not([data-page="index"]) main.page > .visual-asset {
+  margin: 28px 0 22px;
+}
+
+body[data-page="quote"] main.page {
+  max-width: 1040px;
+  padding-top: 38px;
+}
+
+body[data-page="quote"] .crumbs {
+  padding-top: 0;
+}
+
+body[data-page="quote"] main.page > h1 {
+  max-width: 880px;
+  margin: 28px 0 0;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 0.98;
+}
+
+body[data-page="quote"] main.page > .visual-asset,
+body[data-page="serie-a"] main.page > .visual-asset {
+  object-position: center top;
+}
+
+body[data-page="quote"] main.page > .visual-asset.silhouette-asset {
+  display: none;
+}
+
+body[data-page="quote"] main.page > section:first-of-type {
+  padding: 42px 0 64px;
+  border-top: 0;
+}
+
+body[data-page="quote"] main.page > section:first-of-type h2 {
+  max-width: 620px;
+  font-size: clamp(28px, 3.2vw, 42px);
+}
+
+body[data-page="quote"] main.page > section:first-of-type p,
+body[data-page="quote"] main.page > section:first-of-type .tbl-wrap {
+  max-width: 720px;
+}
+
+body[data-page="quote"] main.page > section:not(:first-of-type),
+body[data-page="quote"] main.page > nav[aria-label="Pagine correlate"] {
+  width: 100%;
+}
+
+body[data-page="biografia"] main.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 32px;
+  align-items: start;
+}
+
+body[data-page="biografia"] .crumbs,
+body[data-page="biografia"] h1 {
+  grid-column: 1 / -1;
+}
+
+body[data-page="biografia"] .visual-asset {
+  grid-column: 2;
+  grid-row: 3 / span 2;
+  margin: 0;
+  position: sticky;
+  top: 160px;
+}
+
+body[data-page="biografia"] section,
+body[data-page="biografia"] nav[aria-label="Pagine correlate"] {
+  grid-column: 1;
+}
+
+@media (max-width: 900px) {
+  .mh-top,
+  .mh-cats-inner,
+  main.page,
+  .mf {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .odds-ticker {
+    top: 86px;
+  }
+
+  body[data-page="index"] main.page,
+  body[data-page="biografia"] main.page,
+  body[data-page="quote"] main.page {
+    display: block;
+    padding-top: 42px;
+  }
+
+  body[data-page="index"] main.page {
+    width: 100%;
+    margin: 12px 0 0;
+    padding: 58px 20px 48px;
+    background: transparent;
+  }
+
+  body[data-page="index"] main.page::after {
+    height: 650px;
+    background:
+      linear-gradient(180deg, rgba(5, 7, 12, 0.76) 0%, rgba(5, 7, 12, 0.96) 60%),
+      url("/shared/lautaro-hero-action.png") 62% top / cover no-repeat;
+  }
+
+  body[data-page="index"] main.page::before {
+    display: inline-block;
+    padding-left: 18px;
+    border-left-width: 28px;
+  }
+
+  body[data-page="index"] main.page > h1 {
+    margin-top: 22px;
+    font-size: 48px;
+    max-width: 100%;
+  }
+
+  body[data-page="index"] main.page > section:first-of-type {
+    padding-top: 24px;
+  }
+
+  body[data-page="index"] main.page > section:first-of-type p {
+    max-width: 100%;
+    font-size: 17px;
+  }
+
+  .hero-actions {
+    gap: 12px;
+  }
+
+  body[data-page="index"] main.page > .visual-asset:first-of-type,
+  body[data-page="biografia"] .visual-asset {
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    margin: 24px 0 34px;
+    position: static;
+  }
+
+  body[data-page="quote"] main.page > h1 {
+    margin-top: 22px;
+    font-size: 38px;
+  }
+
+  body[data-page="quote"] main.page > .visual-asset.silhouette-asset {
+    display: none;
+  }
+
+  body[data-page="quote"] main.page > section:first-of-type {
+    padding-top: 32px;
+  }
+
+  h1 {
+    font-size: 48px;
+  }
+
+  section {
+    padding: 58px 0;
+  }
+
+  .mission-popup {
+    left: 50%;
+    right: auto;
+    bottom: 12px;
+    width: calc(100% - 24px);
+    min-height: 178px;
+    transform: translateX(-50%);
+    background:
+      linear-gradient(90deg, rgba(3, 5, 9, 0.98) 0%, rgba(5, 7, 13, 0.9) 58%, rgba(8, 25, 47, 0.68) 100%),
+      url("/shared/lautaro-hero-action.png") 68% center / cover no-repeat;
+  }
+
+  .mission-popup-content {
+    max-width: 100%;
+    padding: 24px 58px 24px 18px;
+  }
+
+  .mission-popup-content strong {
+    font-size: 22px;
+  }
+
+  .mission-popup-content span {
+    font-size: 26px;
+  }
+
+}
+
+@media (max-width: 520px) {
+  html {
+    scroll-padding-top: 92px;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  .mh-top {
+    min-height: 72px;
+  }
+
+  .mh-logo {
+    min-height: 56px;
+  }
+
+  .mh-logo-text::before {
+    font-size: 32px;
+  }
+
+  .mh-logo::after {
+    font-size: 15px;
+    transform: translateY(4px);
+  }
+
+  .mh-cats-inner {
+    min-height: 0;
+  }
+
+  .mh-cats a {
+    font-size: 15px;
+  }
+
+  .mh-actions {
+    display: none;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-cta {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 14px 18px;
+  }
+
+  .related a {
+    width: auto;
+    min-height: 44px;
+    padding: 9px 14px;
+  }
+
+  .mission-popup {
+    min-height: 190px;
+    border-radius: 12px;
+  }
+
+  .mission-popup-close {
+    width: 34px;
+    height: 34px;
+    font-size: 24px;
+  }
+
+  .mission-popup-content strong {
+    font-size: 19px;
+  }
+
+  .mission-popup-content span {
+    font-size: 23px;
+  }
+
+  .mission-popup-cta {
+    min-width: 0;
+    width: min(100%, 230px);
+    min-height: 48px;
+    font-size: 18px;
+  }
+
+  .visual-asset {
+    border-radius: 14px;
+  }
+
+  .visual-asset.silhouette-asset {
+    border-radius: 0;
+  }
+}
+
+.visual-asset.silhouette-asset {
+  aspect-ratio: auto;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  filter:
+    drop-shadow(0 0 18px rgba(47, 107, 255, 0.34))
+    drop-shadow(0 0 42px rgba(47, 107, 255, 0.2))
+    drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
+}
+
+body[data-page="index"] main.page > .visual-asset.silhouette-asset:first-of-type,
+body[data-page="quote"] main.page > .visual-asset.silhouette-asset {
+  object-fit: contain;
+  object-position: center bottom;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  filter:
+    drop-shadow(0 0 18px rgba(47, 107, 255, 0.34))
+    drop-shadow(0 0 42px rgba(47, 107, 255, 0.2))
+    drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
+}
+
+body[data-page="index"] main.page {
+  display: block;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 96px;
+  overflow: visible;
+  border-top: 0;
+  background: transparent;
+}
+
+body[data-page="index"] main.page::before,
+body[data-page="index"] main.page::after {
+  content: none;
+}
+
+body[data-page="index"] .hero-block {
+  position: relative;
+  min-height: min(780px, calc(100vh - 24px));
+  margin: 20px 24px 0;
+  padding: clamp(90px, 13vh, 190px) 44px 58px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.99) 0%, rgba(5, 7, 12, 0.94) 28%, rgba(5, 7, 12, 0.52) 52%, rgba(8, 22, 58, 0.52) 100%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0) 0%, rgba(5, 7, 12, 0.38) 100%),
+    url("/shared/lautaro-hero-action.png") center right / cover no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+body[data-page="index"] main.page > section.hero-block:first-of-type {
+  box-sizing: border-box;
+  max-width: none;
+  margin: 20px 24px 0;
+  padding: clamp(90px, 13vh, 190px) max(44px, calc((100% - var(--maxw)) / 2 + 16px)) 58px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+body[data-page="index"] .hero-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 78% 14%, rgba(47, 107, 255, 0.22), transparent 34%);
+  mix-blend-mode: screen;
+  opacity: 0.42;
+}
+
+body[data-page="index"] .hero-kicker {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding-left: 30px;
+  border-left: 46px solid var(--brand-primary);
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+body[data-page="index"] .hero-block h1 {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 24px 0 0;
+  font-size: clamp(62px, 7vw, 116px);
+  line-height: 0.88;
+  text-shadow: 0 14px 46px rgba(0, 0, 0, 0.56);
+}
+
+body[data-page="index"] .hero-block h1 span {
+  display: block;
+}
+
+body[data-page="index"] .hero-block h1 .h1-accent {
+  color: #2f6bff;
+}
+
+body[data-page="index"] .hero-block p {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  margin: 30px 0 0;
+  color: #c7cbd4;
+  font-size: 20px;
+  line-height: 1.55;
+}
+
+body[data-page="index"] .hero-actions {
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+}
+
+body[data-page="index"] .hero-odd {
+  position: absolute;
+  right: max(38px, calc((100% - var(--maxw)) / 2 + 16px));
+  bottom: 64px;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 210px;
+  padding: 14px 18px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 14px;
+  background: rgba(5, 7, 12, 0.54);
+  backdrop-filter: blur(8px);
+}
+
+body[data-page="index"] .hero-odd span,
+body[data-page="index"] .hero-odd small {
+  color: #9ba1ad;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body[data-page="index"] .hero-odd strong {
+  color: var(--brand-primary);
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+body[data-page="index"] main.page > section:not(.hero-block),
+body[data-page="index"] main.page > nav[aria-label="Pagine correlate"] {
+  max-width: var(--maxw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+body[data-page="mondiale-2026-stats"] main.page > .visual-asset {
+  display: none;
+}
+
+body[data-page="mondiale-2026-stats"] main.page > section:first-of-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 46px;
+  text-align: center;
+}
+
+body[data-page="mondiale-2026-stats"] main.page > section:first-of-type p {
+  max-width: 760px;
+  color: #c7cbd4;
+  font-size: 20px;
+}
+
+body[data-page="mondiale-2026-stats"] .crumbs,
+body[data-page="mondiale-2026-stats"] main.page > h1 {
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+body[data-page="mondiale-2026-stats"] main.page > h1 {
+  max-width: 980px;
+}
+
+body[data-page="mondiale-2026-stats"] main.page > section:first-of-type .tbl-wrap {
+  max-width: 880px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.stats-action-card {
+  position: relative;
+  overflow: hidden;
+  max-width: 980px;
+  margin: 28px 0 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: #05070c;
+  box-shadow:
+    0 30px 90px -34px rgba(47, 107, 255, 0.72),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.stats-action-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.5) 0%, rgba(5, 7, 12, 0.12) 44%, rgba(8, 22, 58, 0.32) 100%),
+    linear-gradient(180deg, transparent 0%, rgba(5, 7, 12, 0.3) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.024) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen;
+}
+
+.stats-action-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: saturate(0.95) contrast(1.08) brightness(0.62);
+}
+
+body[data-page="tifosi-italiani"] .tifosi-action-image {
+  max-width: 980px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 36%;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #05070c;
+  filter: saturate(0.92) contrast(1.08) brightness(0.68);
+  box-shadow:
+    0 30px 90px -34px rgba(47, 107, 255, 0.72),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 900px) {
+  body[data-page="index"] .hero-block {
+    min-height: 640px;
+    margin: 12px 0 0;
+    padding: 64px 20px 48px;
+    background:
+      linear-gradient(180deg, rgba(5, 7, 12, 0.68) 0%, rgba(5, 7, 12, 0.97) 58%),
+      url("/shared/lautaro-hero-action.png") 62% top / cover no-repeat;
+  }
+
+  body[data-page="index"] main.page > section.hero-block:first-of-type {
+    margin: 12px 0 0;
+    padding: 64px 20px 48px;
+  }
+
+  body[data-page="index"] .hero-kicker {
+    padding-left: 18px;
+    border-left-width: 28px;
+    font-size: 11px;
+  }
+
+  body[data-page="index"] .hero-block h1 {
+    max-width: 100%;
+    margin-top: 22px;
+    font-size: 48px;
+  }
+
+  body[data-page="index"] .hero-block p {
+    max-width: 100%;
+    font-size: 17px;
+  }
+
+  body[data-page="index"] .hero-odd {
+    display: none;
+  }
+
+  body[data-page="index"] main.page > section:not(.hero-block),
+  body[data-page="index"] main.page > nav[aria-label="Pagine correlate"] {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .stats-action-card {
+    margin: 24px 0 28px;
+    border-radius: 14px;
+  }
+
+  .stats-action-card img {
+    aspect-ratio: 4 / 5;
+  }
+
+  body[data-page="tifosi-italiani"] .tifosi-action-image {
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+  }
+}
+
+body[data-page="mondiale-2026-stats"] .stats-action-card,
+body[data-page="tifosi-italiani"] main.page > .tifosi-action-image,
+body[data-page="biografia"] main.page > .visual-asset.portrait {
+  display: none !important;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale,
+body[data-page="biografia"] #profilo-del-toro {
+  position: relative;
+  min-height: 540px;
+  overflow: hidden;
+  margin-top: 36px;
+  padding: clamp(76px, 8vw, 112px) clamp(24px, 5vw, 58px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #05070c;
+  box-shadow: 0 34px 100px -52px rgba(47, 107, 255, 0.9);
+}
+
+body[data-page="biografia"] #profilo-del-toro {
+  grid-column: 1 / -1;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::before,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale::before,
+body[data-page="biografia"] #profilo-del-toro::before {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  filter: blur(2.5px) saturate(0.9) contrast(1.08) brightness(0.55);
+  transform: scale(1.04);
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::after,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale::after,
+body[data-page="biografia"] #profilo-del-toro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.98) 0%, rgba(5, 7, 12, 0.88) 36%, rgba(5, 7, 12, 0.46) 70%, rgba(8, 22, 58, 0.24) 100%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0.08) 0%, rgba(5, 7, 12, 0.7) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 4px);
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::before {
+  background-image: url("/shared/lautaro-stats-run.png");
+  background-position: center 42%;
+}
+
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale::before {
+  background-image: url("/shared/lautaro-tifosi-argentina.png");
+  background-position: center 28%;
+}
+
+body[data-page="biografia"] #profilo-del-toro::before {
+  background-image: url("/shared/lautaro-bio.png");
+  background-position: center 22%;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale > *,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale > *,
+body[data-page="biografia"] #profilo-del-toro > * {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale h2,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale h2,
+body[data-page="biografia"] #profilo-del-toro h2 {
+  max-width: 720px;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale p,
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale ul,
+body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale p,
+body[data-page="biografia"] #profilo-del-toro p,
+body[data-page="biografia"] #profilo-del-toro .tbl-wrap {
+  max-width: 650px;
+}
+
+@media (max-width: 900px) {
+  body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale,
+  body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale,
+  body[data-page="biografia"] #profilo-del-toro {
+    min-height: 560px;
+    margin-top: 28px;
+    padding: 58px 22px;
+  }
+
+  body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::after,
+  body[data-page="tifosi-italiani"] #un-pezzo-di-serie-a-al-mondiale::after,
+  body[data-page="biografia"] #profilo-del-toro::after {
+    background:
+      linear-gradient(180deg, rgba(5, 7, 12, 0.62) 0%, rgba(5, 7, 12, 0.95) 52%, rgba(5, 7, 12, 0.98) 100%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 4px);
+  }
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 620px;
+  padding-right: clamp(28px, 44vw, 580px);
+  background:
+    radial-gradient(circle at 74% 52%, rgba(47, 107, 255, 0.26), transparent 34%),
+    linear-gradient(90deg, #05070c 0%, #05070c 34%, #081633 100%);
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::before {
+  inset: -28px -42px -28px 36%;
+  background-image: url("/shared/lautaro-stats-run.png");
+  background-position: center right;
+  background-size: cover;
+  filter: blur(4px) saturate(0.95) contrast(1.08) brightness(0.64);
+  opacity: 0.9;
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.16) 12%, #000 34%, #000 100%);
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::after {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.99) 0%, rgba(5, 7, 12, 0.95) 34%, rgba(5, 7, 12, 0.66) 58%, rgba(5, 7, 12, 0.28) 100%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0.16) 0%, rgba(5, 7, 12, 0.76) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 4px);
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale h2,
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale p,
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale ul {
+  max-width: 620px;
+}
+
+body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale p {
+  color: #d7dbe4;
+  font-size: 20px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.72);
+}
+
+@media (max-width: 900px) {
+  body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale {
+    min-height: 600px;
+    padding-right: 22px;
+  }
+
+  body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::before {
+    inset: -24px;
+    background-position: center;
+    opacity: 0.72;
+    mask-image: none;
+  }
+
+  body[data-page="mondiale-2026-stats"] #la-prima-rete-mondiale::after {
+    background:
+      linear-gradient(180deg, rgba(5, 7, 12, 0.72) 0%, rgba(5, 7, 12, 0.96) 48%, rgba(5, 7, 12, 0.99) 100%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 4px);
+  }
+}
+
+body[data-page="biografia"] #profilo-del-toro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 600px;
+  padding-right: clamp(28px, 34vw, 470px);
+  background:
+    radial-gradient(circle at 78% 40%, rgba(201, 255, 58, 0.12), transparent 24%),
+    radial-gradient(circle at 78% 54%, rgba(47, 107, 255, 0.28), transparent 36%),
+    linear-gradient(90deg, #05070c 0%, #05070c 46%, #081633 100%);
+}
+
+body[data-page="biografia"] #profilo-del-toro::before {
+  top: clamp(112px, 12vw, 158px);
+  right: 20px;
+  bottom: auto;
+  left: auto;
+  width: min(42vw, 520px);
+  height: min(31vw, 330px);
+  background-image: url("/shared/generated/football-motion-real-left.png?v=real-ball-left");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter:
+    drop-shadow(-18px 28px 34px rgba(0, 0, 0, 0.62))
+    drop-shadow(0 0 32px rgba(47, 107, 255, 0.28));
+  opacity: 0.92;
+  transform: translateY(-4%) rotate(-2deg);
+}
+
+body[data-page="biografia"] #profilo-del-toro::after {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.99) 0%, rgba(5, 7, 12, 0.96) 45%, rgba(5, 7, 12, 0.58) 72%, rgba(5, 7, 12, 0.2) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 4px);
+}
+
+body[data-page="biografia"] #profilo-del-toro p {
+  color: #d7dbe4;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.72);
+}
+
+@media (max-width: 900px) {
+  body[data-page="biografia"] #profilo-del-toro {
+    min-height: 640px;
+    padding-right: 22px;
+  }
+
+  body[data-page="biografia"] #profilo-del-toro::before {
+    top: 62px;
+    right: -54px;
+    bottom: auto;
+    left: auto;
+    width: 300px;
+    height: 190px;
+    opacity: 0.46;
+  }
+
+  body[data-page="biografia"] #profilo-del-toro::after {
+    background:
+      linear-gradient(180deg, rgba(5, 7, 12, 0.76) 0%, rgba(5, 7, 12, 0.96) 38%, rgba(5, 7, 12, 0.99) 100%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 4px);
+  }
+}
